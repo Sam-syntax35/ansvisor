@@ -156,6 +156,7 @@ interface UIFilters {
   prompt: string;
   excludeOwnDomain: boolean;
   competitorOnly: boolean;
+  ownOnly: boolean;
 }
 
 interface PromptOption {
@@ -185,6 +186,7 @@ const DEFAULT_FILTERS: UIFilters = {
   prompt: '',
   excludeOwnDomain: false,
   competitorOnly: false,
+  ownOnly: false,
 };
 
 function buildPlatformOptions(rows: CitationsOverview['rows']): PlatformOption[] {
@@ -589,7 +591,12 @@ function FilterBar({
           variant={filters.excludeOwnDomain ? 'default' : 'outline'}
           size="sm"
           className="h-8 text-xs"
-          onClick={() => onChange({ excludeOwnDomain: !filters.excludeOwnDomain })}
+          onClick={() =>
+            onChange({
+              excludeOwnDomain: !filters.excludeOwnDomain,
+              ownOnly: false,
+            })
+          }
         >
           Exclude own domain
         </Button>
@@ -602,10 +609,26 @@ function FilterBar({
             onChange({
               competitorOnly: !filters.competitorOnly,
               excludeOwnDomain: !filters.competitorOnly ? true : filters.excludeOwnDomain,
+              ownOnly: false,
             })
           }
         >
           Competitors only
+        </Button>
+        <Button
+          type="button"
+          variant={filters.ownOnly ? 'default' : 'outline'}
+          size="sm"
+          className="h-8 text-xs"
+          onClick={() =>
+            onChange({
+              ownOnly: !filters.ownOnly,
+              excludeOwnDomain: false,
+              competitorOnly: false,
+            })
+          }
+        >
+          Own domain only
         </Button>
       </div>
     </div>
@@ -831,6 +854,7 @@ export default function CitationsPage() {
         promptIds: filters.prompt ? [filters.prompt] : undefined,
         excludeOwnDomain: filters.excludeOwnDomain,
         competitorOnly: filters.competitorOnly,
+        ownOnly: filters.ownOnly,
       };
       const overview = await getCitationsOverview(activeBrandId, apiFilters);
       setData(overview);
@@ -866,6 +890,7 @@ export default function CitationsPage() {
     filters.prompt,
     filters.excludeOwnDomain,
     filters.competitorOnly,
+    filters.ownOnly,
   ]);
 
   useEffect(() => {
