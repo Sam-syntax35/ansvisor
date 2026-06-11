@@ -1,6 +1,6 @@
 <div align="center">
 
-[![Ansvisor Banner](https://cdn.prod.website-files.com/69e606308fb6f96fb911b251/69f0a8f250aa69dd7f6d9a30_s12.svg)](https://www.ansvisor.com)
+[![Ansvisor Banner](https://cdn.prod.website-files.com/69e606308fb6f96fb911b251/6a2a92ca0bf3f52b9dbf73d5_811d97a16c5c5f3b7bf3b4875078037e_1.png)](https://www.ansvisor.com)
 
 [![🚀 Try the Cloud — ansvisor.com](https://img.shields.io/badge/🚀_Try_the_Cloud-ansvisor.com-6366f1?style=for-the-badge&logoColor=white&logo=vercel)](https://www.ansvisor.com)
 [![📚 Docs](https://img.shields.io/badge/📚_Docs-docs.ansvisor.com-10b981?style=for-the-badge&logoColor=white&logo=readthedocs)](https://docs.ansvisor.com)
