@@ -15,7 +15,9 @@
     "start": "NODE_ENV=production pm2 start src/server.js --max-restarts 10000",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.js\" --ignore-path .prettierignore",
-    "format:check": "prettier --check \"src/**/*.js\" --ignore-path .prettierignore"
+    "format:check": "prettier --check \"src/**/*.js\" --ignore-path .prettierignore",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "Empler AI Inc.",
@@ -45,6 +47,7 @@
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.8",
     "nodemon": "^3.0.2",
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.3",
+    "vitest": "^3.2.6"
   }
 }
