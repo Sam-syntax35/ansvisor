@@ -169,4 +169,97 @@ describe('cloro-scraper – parseScraperResponse', () => {
       expect(parsed.shopping_cards).toEqual([]);
     });
   });
+
+  describe('search_queries (observed query fan-out, #332)', () => {
+    it('maps Copilot string[] searchQueries to rich items tagged with the source platform', () => {
+      const result = {
+        markdown: 'text',
+        sources: [],
+        searchQueries: ['best running shoes 2026', 'running shoes flat feet'],
+      };
+      const parsed = parseScraperResponse(result, 'copilot-web');
+      expect(parsed.search_queries).toEqual([
+        { query: 'best running shoes 2026', source_platform: 'copilot-web' },
+        { query: 'running shoes flat feet', source_platform: 'copilot-web' },
+      ]);
+    });
+
+    it('preserves the per-item engine label from Perplexity search_model_queries', () => {
+      const result = {
+        markdown: 'text',
+        sources: [],
+        search_model_queries: [
+          { query: 'best laptops 2026', engine: 'web', limit: 10 },
+          { query: 'laptop reviews', engine: 'web' },
+        ],
+      };
+      const parsed = parseScraperResponse(result, 'perplexity-web');
+      expect(parsed.search_queries).toEqual([
+        { query: 'best laptops 2026', engine: 'web', source_platform: 'perplexity-web' },
+        { query: 'laptop reviews', engine: 'web', source_platform: 'perplexity-web' },
+      ]);
+    });
+
+    it('drops blank / non-string fan-out entries', () => {
+      const result = {
+        markdown: 'text',
+        sources: [],
+        searchQueries: ['ok query', '   ', '', 42, null],
+      };
+      const parsed = parseScraperResponse(result, 'copilot-web');
+      expect(parsed.search_queries).toEqual([
+        { query: 'ok query', source_platform: 'copilot-web' },
+      ]);
+    });
+
+    it('trims surrounding whitespace so a sub-query has one canonical form', () => {
+      const copilot = parseScraperResponse(
+        { markdown: 't', sources: [], searchQueries: ['  spaced query  '] },
+        'copilot-web',
+      );
+      expect(copilot.search_queries).toEqual([
+        { query: 'spaced query', source_platform: 'copilot-web' },
+      ]);
+
+      const perplexity = parseScraperResponse(
+        {
+          markdown: 't',
+          sources: [],
+          search_model_queries: [{ query: '  spaced  ', engine: '  web  ' }],
+        },
+        'perplexity-web',
+      );
+      expect(perplexity.search_queries).toEqual([
+        { query: 'spaced', engine: 'web', source_platform: 'perplexity-web' },
+      ]);
+    });
+
+    it('omits a non-string / empty Perplexity engine label', () => {
+      const parsed = parseScraperResponse(
+        {
+          markdown: 't',
+          sources: [],
+          search_model_queries: [
+            { query: 'no engine', engine: 42 },
+            { query: 'blank engine', engine: '   ' },
+          ],
+        },
+        'perplexity-web',
+      );
+      expect(parsed.search_queries).toEqual([
+        { query: 'no engine', source_platform: 'perplexity-web' },
+        { query: 'blank engine', source_platform: 'perplexity-web' },
+      ]);
+    });
+
+    it('defaults to an empty array when the engine returns none (ChatGPT in practice)', () => {
+      expect(
+        parseScraperResponse({ markdown: 't', sources: [], searchQueries: [] }, 'chatgpt-web')
+          .search_queries,
+      ).toEqual([]);
+      expect(
+        parseScraperResponse({ markdown: 't', sources: [] }, 'gemini-web').search_queries,
+      ).toEqual([]);
+    });
+  });
 });

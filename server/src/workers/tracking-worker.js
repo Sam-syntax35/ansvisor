@@ -309,6 +309,9 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
               model_used: aiResponse.model,
               region: meta.region,
               competitor_mentions: metrics.competitorMentions,
+              search_queries: Array.isArray(aiResponse.search_queries)
+                ? aiResponse.search_queries
+                : [],
             });
 
             logger.debug({ taskId, scraperId }, 'scraper task result saved');
