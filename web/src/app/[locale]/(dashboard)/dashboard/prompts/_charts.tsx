@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
+import { formatCompactNumber } from '@/lib/format';
 
 // ─── Auto-sizing wrapper ─────────────────────────────────────────────────────
 
@@ -107,7 +108,7 @@ export function PlatformVolumeChart({ totalVolume }: { totalVolume: number }) {
             tickLine={false}
             axisLine={false}
             className="fill-muted-foreground"
-            tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
+            tickFormatter={formatCompactNumber}
           />
           <YAxis
             type="category"

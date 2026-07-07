@@ -59,6 +59,7 @@ import type { PromptVolume, Prompt } from '@/types';
 import { toast } from 'sonner';
 import { toCsv } from '@/lib/csv';
 import { compareNullsLast, type SortDir } from './prompt-sort';
+import { formatCompactNumber } from '@/lib/format';
 
 // ─── Info Tooltip ─────────────────────────────────────────────────────────────
 
@@ -265,8 +266,7 @@ function KpiCard({
 }
 
 function VolumePill({ value }: { value: number }) {
-  const k = value >= 1000 ? `~${(value / 1000).toFixed(1)}k` : `~${value}`;
-  return <span className="tabular-nums font-semibold text-sm">{k}</span>;
+  return <span className="tabular-nums text-sm font-semibold">~{formatCompactNumber(value)}</span>;
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
@@ -745,8 +745,8 @@ export default function PromptsPage() {
                 <KpiCard
                   title="Total Est. AI Volume"
                   icon={BarChart3}
-                  value={`~${(totalAiVol / 1000).toFixed(0)}k`}
-                  sub={`from ${(totalGoogleVol / 1000).toFixed(0)}k Google searches`}
+                  value={`~${formatCompactNumber(totalAiVol)}`}
+                  sub={`from ${formatCompactNumber(totalGoogleVol)} Google searches`}
                 />
                 <KpiCard
                   title="AI Adoption Rate"
@@ -757,7 +757,7 @@ export default function PromptsPage() {
                 <KpiCard
                   title="Avg. AI Volume"
                   icon={BarChart3}
-                  value={`~${(totalAiVol / volumes.length / 1000).toFixed(1)}k`}
+                  value={`~${formatCompactNumber(totalAiVol / volumes.length)}`}
                   sub="per prompt"
                 />
               </div>
@@ -1292,7 +1292,7 @@ function SimilarTopicsList({ volumes }: { volumes: PromptVolume[] }) {
               />
             </div>
             <span className="w-12 text-right font-medium tabular-nums text-foreground">
-              {item.volume >= 1000 ? `${(item.volume / 1000).toFixed(1)}k` : item.volume}
+              {formatCompactNumber(item.volume)}
             </span>
           </div>
         );

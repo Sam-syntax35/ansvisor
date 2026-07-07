@@ -19,12 +19,9 @@ import { getPromptVolumes } from '@/lib/actions/volumes';
 import { aggregatePromptVolumeClusters } from '@/lib/prompt-volume-clusters';
 import { useBrandStore } from '@/stores/use-brand-store';
 import type { PromptVolume } from '@/types';
+import { formatCompactNumber } from '@/lib/format';
 
-function formatVolume(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
-  return value.toLocaleString();
-}
+
 
 export default function SimilarTopicsPage() {
   const { getActiveBrand } = useBrandStore();
@@ -118,7 +115,7 @@ export default function SimilarTopicsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold tabular-nums">
-              {formatVolume(totals.googleVolume)}
+              {formatCompactNumber(totals.googleVolume)}
             </div>
             <p className="text-xs text-muted-foreground">monthly searches</p>
           </CardContent>
@@ -129,7 +126,7 @@ export default function SimilarTopicsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold tabular-nums">
-              {formatVolume(totals.aiVolume)}
+              {formatCompactNumber(totals.aiVolume)}
             </div>
             <p className="text-xs text-muted-foreground">monthly AI queries</p>
           </CardContent>
@@ -186,10 +183,10 @@ export default function SimilarTopicsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium tabular-nums">
-                        {formatVolume(cluster.volume)}
+                        {formatCompactNumber(cluster.volume)}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
-                        {formatVolume(cluster.estimatedAiVolume)}
+                        {formatCompactNumber(cluster.estimatedAiVolume)}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline">{cluster.occurrences}</Badge>
