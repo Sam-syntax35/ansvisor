@@ -21,8 +21,6 @@ import { useBrandStore } from '@/stores/use-brand-store';
 import type { PromptVolume } from '@/types';
 import { formatCompactNumber } from '@/lib/format';
 
-
-
 export default function SimilarTopicsPage() {
   const { getActiveBrand } = useBrandStore();
   const brand = getActiveBrand();
