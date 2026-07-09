@@ -473,7 +473,11 @@ export default function ContentPage() {
                   </div>
                   <Select value={statusFilter} onValueChange={(v) => v && setStatusFilter(v)}>
                     <SelectTrigger className="h-8 w-[130px] text-xs">
-                      <SelectValue />
+                      <SelectValue>
+                        {(value) =>
+                          value === 'all' ? t('filters.allStatuses') : t(`status.${value}`)
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{t('filters.allStatuses')}</SelectItem>
@@ -486,7 +490,11 @@ export default function ContentPage() {
                   </Select>
                   <Select value={impactFilter} onValueChange={(v) => v && setImpactFilter(v)}>
                     <SelectTrigger className="h-8 w-[120px] text-xs">
-                      <SelectValue />
+                      <SelectValue>
+                        {(value) =>
+                          value === 'all' ? t('filters.allImpacts') : t(`impact.${value}`)
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{t('filters.allImpacts')}</SelectItem>
@@ -497,7 +505,9 @@ export default function ContentPage() {
                   </Select>
                   <Select value={typeFilter} onValueChange={(v) => v && setTypeFilter(v)}>
                     <SelectTrigger className="h-8 w-[110px] text-xs">
-                      <SelectValue />
+                      <SelectValue>
+                        {(value) => (value === 'all' ? t('filters.allTypes') : t(`type.${value}`))}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{t('filters.allTypes')}</SelectItem>
