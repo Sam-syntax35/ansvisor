@@ -6,6 +6,7 @@ import { resolveModel } from '../lib/ai-provider.js';
 import { classifyPromptIntent } from '../lib/intent-extraction.js';
 import { getLanguageName } from '../lib/languages.js';
 import { requireFeature } from '../lib/plan-guard.js';
+import { withRetry } from '../lib/retry.js';
 
 const router = Router();
 
@@ -442,12 +443,20 @@ Based on this brand's industry and context, generate 10 short, generic search pr
     const promptModel = process.env.PROMPT_SUGGESTION_MODEL || 'google/gemini-3-flash-preview';
     const aiModel = resolveModel(model || promptModel);
 
-    const { object } = await generateObject({
-      model: aiModel,
-      schema: promptSuggestionSchema,
-      system: getSystemPrompt(langName),
-      prompt: userPrompt,
-    });
+    const { object } = await withRetry(
+      () =>
+        generateObject({
+          model: aiModel,
+          schema: promptSuggestionSchema,
+          system: getSystemPrompt(langName),
+          prompt: userPrompt,
+        }),
+      {
+        attempts: 3,
+        baseDelayMs: 500,
+        label: 'prompts',
+      },
+    );
 
     return res.json({ prompts: object.prompts });
   } catch (error) {

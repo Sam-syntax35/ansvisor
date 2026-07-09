@@ -247,6 +247,7 @@ export default function OnboardingPage() {
   const [selectedTopics, setSelectedTopics] = useState<Set<string>>(new Set());
   const [customTopic, setCustomTopic] = useState('');
   const [loadingTopics, setLoadingTopics] = useState(false);
+  const [topicSuggestionError, setTopicSuggestionError] = useState(false);
   const [topicLoadingMsg, setTopicLoadingMsg] = useState('');
   const topicMsgIdx = useRef(0);
 
@@ -278,6 +279,7 @@ export default function OnboardingPage() {
   }
   const [suggestedCompetitors, setSuggestedCompetitors] = useState<CompetitorItem[]>([]);
   const [loadingCompetitors, setLoadingCompetitors] = useState(false);
+  const [competitorSuggestionError, setCompetitorSuggestionError] = useState(false);
   const [competitorName, setCompetitorName] = useState('');
   const [competitorDomain, setCompetitorDomain] = useState('');
   const [savingCompetitors, setSavingCompetitors] = useState(false);
@@ -570,6 +572,8 @@ export default function OnboardingPage() {
 
   const fetchTopicSuggestions = async () => {
     setLoadingTopics(true);
+    setTopicSuggestionError(false);
+
     try {
       const supabase = createClient();
       const {
@@ -599,7 +603,7 @@ export default function OnboardingPage() {
       setSelectedTopics(new Set(names.slice(0, 7)));
     } catch (err) {
       console.error('Topic suggestion error:', err);
-      toast.error('Failed to generate topic suggestions');
+      setTopicSuggestionError(true);
     } finally {
       setLoadingTopics(false);
     }
@@ -734,6 +738,8 @@ export default function OnboardingPage() {
 
   const fetchCompetitorSuggestions = async () => {
     setLoadingCompetitors(true);
+    setCompetitorSuggestionError(false);
+
     try {
       const supabase = createClient();
       const {
@@ -766,7 +772,7 @@ export default function OnboardingPage() {
       );
     } catch (err) {
       console.error('Competitor suggestion error:', err);
-      toast.error('Failed to generate competitor suggestions');
+      setCompetitorSuggestionError(true);
     } finally {
       setLoadingCompetitors(false);
     }
@@ -1129,53 +1135,61 @@ export default function OnboardingPage() {
                   </span>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {suggestedTopics.map((topic) => {
-                    const isSelected = selectedTopics.has(topic);
-                    return (
-                      <button
-                        key={topic}
-                        onClick={() => toggleTopic(topic)}
-                        className={cn(
-                          'flex items-center gap-3 w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors',
-                          isSelected
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-muted-foreground/30',
-                        )}
-                      >
-                        <div
+                <>
+                  {topicSuggestionError && (
+                    <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
+                      Could not fetch suggestions right now — add your own below.
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    {suggestedTopics.map((topic) => {
+                      const isSelected = selectedTopics.has(topic);
+                      return (
+                        <button
+                          key={topic}
+                          onClick={() => toggleTopic(topic)}
                           className={cn(
-                            'flex h-5 w-5 shrink-0 items-center justify-center rounded border',
+                            'flex items-center gap-3 w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors',
                             isSelected
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-muted-foreground/30',
+                              ? 'border-primary bg-primary/5'
+                              : 'border-border hover:border-muted-foreground/30',
                           )}
                         >
-                          {isSelected && <Check className="h-3 w-3" />}
-                        </div>
-                        {topic}
-                      </button>
-                    );
-                  })}
+                          <div
+                            className={cn(
+                              'flex h-5 w-5 shrink-0 items-center justify-center rounded border',
+                              isSelected
+                                ? 'border-primary bg-primary text-primary-foreground'
+                                : 'border-muted-foreground/30',
+                            )}
+                          >
+                            {isSelected && <Check className="h-3 w-3" />}
+                          </div>
+                          {topic}
+                        </button>
+                      );
+                    })}
 
-                  <div className="flex items-center gap-2 pt-2">
-                    <Input
-                      placeholder="Add custom topic..."
-                      value={customTopic}
-                      onChange={(e) => setCustomTopic(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addCustomTopic()}
-                      className="text-sm"
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={addCustomTopic}
-                      disabled={!customTopic.trim()}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2 pt-2">
+                      <Input
+                        placeholder="Add custom topic..."
+                        value={customTopic}
+                        onChange={(e) => setCustomTopic(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && addCustomTopic()}
+                        className="text-sm"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={addCustomTopic}
+                        disabled={!customTopic.trim()}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
 
               <Button
@@ -1403,6 +1417,12 @@ export default function OnboardingPage() {
                       </button>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {competitorSuggestionError && (
+                <div className="rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
+                  Could not fetch suggestions right now — add your own below.
                 </div>
               )}
 

@@ -11,7 +11,7 @@
  * @param {{ attempts?: number, baseDelayMs?: number, label?: string }} [opts]
  * @returns {Promise<T>}
  */
-import { logger } from '../logger.js';
+import { logger } from './logger.js';
 
 export async function withRetry(fn, { attempts = 3, baseDelayMs = 500, label = 'llm' } = {}) {
   let lastErr;
