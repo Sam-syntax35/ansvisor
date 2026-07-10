@@ -578,7 +578,7 @@ export default function PromptsPage() {
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-500" />
                 <div className="text-sm">
                   <p className="font-medium text-amber-900 dark:text-amber-200">
-                    {unanalyzedCount} keyword{unanalyzedCount === 1 ? '' : 's'} haven&apos;t been
+                    {unanalyzedCount} prompt{unanalyzedCount === 1 ? '' : 's'} haven&apos;t been
                     analyzed yet
                   </p>
                   <p className="text-amber-800/80 dark:text-amber-300/80">
@@ -602,7 +602,7 @@ export default function PromptsPage() {
                 ) : (
                   <>
                     <BarChart3 className="mr-2 h-4 w-4" />
-                    Analyze {unanalyzedCount} keyword{unanalyzedCount === 1 ? '' : 's'}
+                    Analyze {unanalyzedCount} prompt{unanalyzedCount === 1 ? '' : 's'}
                   </>
                 )}
               </Button>
