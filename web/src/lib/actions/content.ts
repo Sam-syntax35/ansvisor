@@ -197,9 +197,11 @@ export async function updateOpportunityStatus(
   return res.json();
 }
 
-export async function sendToWebhook(
-  id: string,
-): Promise<{ success: boolean; webhookStatus: number; opportunityStatus: string }> {
+export type SendToWebhookResult =
+  | { success: true; webhookStatus: number; opportunityStatus: string }
+  | { success: false; error: string };
+
+export async function sendToWebhook(id: string): Promise<SendToWebhookResult> {
   const session = await getSession();
 
   const res = await fetch(`${AEO_SERVER_URL}/api/content/${id}/send-webhook`, {
@@ -212,10 +214,19 @@ export async function sendToWebhook(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Server error: ${res.status}`);
+    let error = body.error || `Server error: ${res.status}`;
+    if (error.includes('No active webhook configured') || error.includes('No active webhook')) {
+      error = 'No workflow connected';
+    }
+    return { success: false, error };
   }
 
-  return res.json();
+  const data = await res.json();
+  return {
+    success: true,
+    webhookStatus: data.webhookStatus,
+    opportunityStatus: data.opportunityStatus,
+  };
 }
 
 export async function testWebhook(

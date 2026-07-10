@@ -117,13 +117,17 @@ export default function ContentDetailPage() {
   const handleSend = async () => {
     setSending(true);
     try {
-      await sendToWebhook(id);
-      toast.success('Sent to workflow!');
-      const updated = await getOpportunity(id);
-      setOpportunity(updated);
+      const result = await sendToWebhook(id);
+      if (result.success === false) {
+        toast.error(result.error);
+      } else {
+        toast.success('Sent to workflow!');
+        const updated = await getOpportunity(id);
+        setOpportunity(updated);
+      }
     } catch (err) {
       console.error('Send failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to send');
+      toast.error('Failed to send');
     } finally {
       setSending(false);
     }

@@ -267,12 +267,16 @@ export default function ContentPage() {
   const handleSendWebhook = async (id: string) => {
     setSendingId(id);
     try {
-      await sendToWebhook(id);
-      toast.success('Sent to workflow!');
-      await loadData(true);
+      const result = await sendToWebhook(id);
+      if (result.success === false) {
+        toast.error(result.error);
+      } else {
+        toast.success('Sent to workflow!');
+        await loadData(true);
+      }
     } catch (err) {
       console.error('Webhook send failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to send');
+      toast.error('Failed to send');
     } finally {
       setSendingId(null);
     }
