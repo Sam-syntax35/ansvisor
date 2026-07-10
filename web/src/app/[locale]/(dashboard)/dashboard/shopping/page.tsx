@@ -87,6 +87,8 @@ import {
   getAIProviderDisplayName,
 } from '@/components/ai-provider-avatar';
 import { toCsv } from '@/lib/csv';
+import { PLATFORM_LABELS } from '@/config/platform-labels';
+import { formatRegionDisplay } from '@/lib/region';
 
 const DATE_PRESETS: ShoppingDatePreset[] = ['7d', '30d', '90d', 'all'];
 
@@ -771,7 +773,7 @@ function FilterBar({
       <FilterField label={t('filterDateRange')}>
         <Select value={datePreset} onValueChange={(v) => setDatePreset(v as ShoppingDatePreset)}>
           <SelectTrigger className="h-8 w-32">
-            <SelectValue />
+            <SelectValue>{(value) => (value === 'all' ? 'All time' : `Last ${value}`)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {DATE_PRESETS.map((p) => (
@@ -786,13 +788,19 @@ function FilterBar({
       <FilterField label={t('filterPlatform')}>
         <Select value={platform} onValueChange={(v) => setPlatform(v ?? 'all')}>
           <SelectTrigger className="h-8 w-40">
-            <SelectValue />
+            <SelectValue>
+              {(value) =>
+                value === 'all' || !value
+                  ? 'All platforms'
+                  : (PLATFORM_LABELS[String(value)] ?? String(value))
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All platforms</SelectItem>
             {platformOpts.map((p) => (
               <SelectItem key={p} value={p}>
-                {p}
+                {PLATFORM_LABELS[p] ?? p}
               </SelectItem>
             ))}
           </SelectContent>
@@ -802,13 +810,17 @@ function FilterBar({
       <FilterField label={t('filterRegion')}>
         <Select value={region} onValueChange={(v) => setRegion(v ?? 'all')}>
           <SelectTrigger className="h-8 w-32">
-            <SelectValue />
+            <SelectValue>
+              {(value) =>
+                value === 'all' || !value ? 'All regions' : formatRegionDisplay(String(value))
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All regions</SelectItem>
             {regionOpts.map((r) => (
               <SelectItem key={r} value={r}>
-                {r}
+                {formatRegionDisplay(r)}
               </SelectItem>
             ))}
           </SelectContent>
