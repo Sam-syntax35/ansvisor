@@ -635,7 +635,9 @@ export default function ContentPage() {
                         >
                           {t(
                             `impact.${opp.impact}` as
-                              'impact.high' | 'impact.medium' | 'impact.low',
+                              | 'impact.high'
+                              | 'impact.medium'
+                              | 'impact.low',
                           )}
                         </Badge>
                       </TableCell>
