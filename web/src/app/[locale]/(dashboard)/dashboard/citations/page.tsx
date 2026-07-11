@@ -93,6 +93,8 @@ import {
 
 const DATE_PRESETS: CitationsDatePreset[] = ['24h', '7d', '30d', '90d', 'all', 'custom'];
 
+const PAGE_SIZE = 100;
+
 const CATEGORY_COLORS: Record<SourceCategory, string> = {
   you: '#6366f1',
   competitor: '#f97316',
@@ -766,10 +768,12 @@ const DomainsTable = memo(function DomainsTable({
   rows,
   brandId,
   onAdded,
+  currentPage,
 }: {
   rows: CitationDomainRow[];
   brandId: string;
   onAdded: () => void;
+  currentPage: number;
 }) {
   if (rows.length === 0) return <EmptyRows />;
 
@@ -790,7 +794,9 @@ const DomainsTable = memo(function DomainsTable({
       <TableBody>
         {rows.map((row, i) => (
           <TableRow key={row.domain}>
-            <TableCell className="text-xs text-muted-foreground tabular-nums">{i + 1}</TableCell>
+            <TableCell className="text-xs text-muted-foreground tabular-nums">
+              {(currentPage - 1) * PAGE_SIZE + i + 1}
+            </TableCell>
             <TableCell>
               <div className="flex items-center gap-2 min-w-0">
                 <DomainFavicon domain={row.domain} />
@@ -834,7 +840,13 @@ const DomainsTable = memo(function DomainsTable({
   );
 });
 
-const UrlsTable = memo(function UrlsTable({ rows }: { rows: CitationUrlRow[] }) {
+const UrlsTable = memo(function UrlsTable({
+  rows,
+  currentPage,
+}: {
+  rows: CitationUrlRow[];
+  currentPage: number;
+}) {
   if (rows.length === 0) return <EmptyRows />;
 
   return (
@@ -851,7 +863,9 @@ const UrlsTable = memo(function UrlsTable({ rows }: { rows: CitationUrlRow[] }) 
       <TableBody>
         {rows.map((row, i) => (
           <TableRow key={row.url}>
-            <TableCell className="text-xs text-muted-foreground tabular-nums">{i + 1}</TableCell>
+            <TableCell className="text-xs text-muted-foreground tabular-nums">
+              {(currentPage - 1) * PAGE_SIZE + i + 1}
+            </TableCell>
             <TableCell>
               <div className="flex items-start gap-2 min-w-0">
                 <DomainFavicon domain={row.domain} />
@@ -894,6 +908,48 @@ function EmptyRows() {
       <p className="mt-1 text-xs text-muted-foreground">
         Try widening your date range or removing filters.
       </p>
+    </div>
+  );
+}
+
+function Pager({
+  currentPage,
+  totalRows,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalRows: number;
+  onPageChange: (page: number) => void;
+}) {
+  const totalPages = Math.ceil(totalRows / PAGE_SIZE);
+  if (totalPages <= 1) return null;
+
+  const startRange = (currentPage - 1) * PAGE_SIZE + 1;
+  const endRange = Math.min(currentPage * PAGE_SIZE, totalRows);
+
+  return (
+    <div className="flex items-center justify-between pt-4 mt-2 border-t">
+      <span className="text-xs text-muted-foreground">
+        {startRange}–{endRange} of {totalRows}
+      </span>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }
@@ -1198,6 +1254,26 @@ export default function CitationsPage() {
   const [gaps, setGaps] = useState<CitationGaps | null>(null);
   const [gapsLoading, setGapsLoading] = useState(false);
 
+  const [domainsPage, setDomainsPage] = useState(1);
+  const [urlsPage, setUrlsPage] = useState(1);
+
+  // Reset pagination to page 1 whenever any filter changes.
+  useEffect(() => {
+    setDomainsPage(1);
+    setUrlsPage(1);
+  }, [
+    filters.datePreset,
+    filters.dateFrom,
+    filters.dateTo,
+    filters.platform,
+    filters.region,
+    filters.topic,
+    filters.prompt,
+    filters.excludeOwnDomain,
+    filters.competitorOnly,
+    filters.ownOnly,
+  ]);
+
   // Shared scoping filters (date / platform / region / topic / prompt). The
   // domain-list flags below don't apply to Competitor Gaps, so keeping them out
   // of this memo means toggling them doesn't refetch the Gaps tab.
@@ -1332,6 +1408,18 @@ export default function CitationsPage() {
     [totals, t],
   );
 
+  const domainsCount = data?.rows.length ?? 0;
+  const paginatedDomains = useMemo(() => {
+    const start = (domainsPage - 1) * PAGE_SIZE;
+    return (data?.rows ?? []).slice(start, start + PAGE_SIZE);
+  }, [data?.rows, domainsPage]);
+
+  const urlsCount = data?.urlRows.length ?? 0;
+  const paginatedUrls = useMemo(() => {
+    const start = (urlsPage - 1) * PAGE_SIZE;
+    return (data?.urlRows ?? []).slice(start, start + PAGE_SIZE);
+  }, [data?.urlRows, urlsPage]);
+
   if (!brand) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -1393,13 +1481,27 @@ export default function CitationsPage() {
                       once and make switching a pure CSS visibility toggle (#299). */}
                   <TabsContent value="domains" keepMounted className="mt-4">
                     <DomainsTable
-                      rows={data?.rows ?? []}
+                      rows={paginatedDomains}
                       brandId={activeBrandId ?? ''}
                       onAdded={loadData}
+                      currentPage={domainsPage}
+                    />
+                    <Pager
+                      currentPage={domainsPage}
+                      totalRows={domainsCount}
+                      onPageChange={setDomainsPage}
                     />
                   </TabsContent>
                   <TabsContent value="urls" keepMounted className="mt-4">
-                    <UrlsTable rows={data?.urlRows ?? []} />
+                    <UrlsTable
+                      rows={paginatedUrls}
+                      currentPage={urlsPage}
+                    />
+                    <Pager
+                      currentPage={urlsPage}
+                      totalRows={urlsCount}
+                      onPageChange={setUrlsPage}
+                    />
                   </TabsContent>
                   <TabsContent value="gaps" className="mt-4">
                     <CompetitorGapsTab loading={gapsLoading} gaps={gaps} />
