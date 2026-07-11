@@ -215,7 +215,7 @@ export async function sendToWebhook(id: string): Promise<SendToWebhookResult> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     let error = body.error || `Server error: ${res.status}`;
-    if (error.includes('No active webhook configured') || error.includes('No active webhook')) {
+    if (error.includes('No active webhook')) {
       error = 'No workflow connected';
     }
     return { success: false, error };
@@ -275,7 +275,18 @@ export async function bulkUpdateStatus(
   return res.json();
 }
 
-export async function bulkSendToWebhook(ids: string[]): Promise<{ sent: number; failed: number }> {
+export type BulkSendResult =
+  | {
+      success: true;
+      sent: number;
+      failed: number;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+export async function bulkSendToWebhook(ids: string[]): Promise<BulkSendResult> {
   const session = await getSession();
 
   const res = await fetch(`${AEO_SERVER_URL}/api/content/bulk/send-webhook`, {
@@ -289,10 +300,19 @@ export async function bulkSendToWebhook(ids: string[]): Promise<{ sent: number; 
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Server error: ${res.status}`);
+    let error = body.error || `Server error: ${res.status}`;
+    if (error.includes('No active webhook')) {
+      error = 'No workflow connected';
+    }
+    return { success: false, error };
   }
 
-  return res.json();
+  const data = await res.json();
+  return {
+    success: true,
+    sent: data.sent,
+    failed: data.failed,
+  };
 }
 
 export async function getWebhookConfig(brandId: string): Promise<WebhookConfig | null> {

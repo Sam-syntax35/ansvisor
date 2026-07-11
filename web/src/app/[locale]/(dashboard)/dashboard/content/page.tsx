@@ -297,12 +297,17 @@ export default function ContentPage() {
     setBulkSending(true);
     try {
       const result = await bulkSendToWebhook(Array.from(selectedIds));
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
       toast.success(`Sent ${result.sent} opportunities to workflow`);
       if (result.failed > 0) toast.error(`${result.failed} failed to send`);
       setSelectedIds(new Set());
       await loadData(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Bulk send failed');
+      console.error('Bulk webhook send failed:', err);
+      toast.error('Failed to send opportunities.');
     } finally {
       setBulkSending(false);
     }
@@ -630,9 +635,7 @@ export default function ContentPage() {
                         >
                           {t(
                             `impact.${opp.impact}` as
-                              | 'impact.high'
-                              | 'impact.medium'
-                              | 'impact.low',
+                              'impact.high' | 'impact.medium' | 'impact.low',
                           )}
                         </Badge>
                       </TableCell>
